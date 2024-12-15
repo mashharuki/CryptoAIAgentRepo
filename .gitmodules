@@ -1,0 +1,3 @@
+[submodule "eliza/eliza"]
+	path = eliza/eliza
+	url = https://github.com/ai16z/eliza.git

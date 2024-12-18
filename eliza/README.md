@@ -11,7 +11,8 @@ git checkout $(git describe --tags --abbrev=0)
 インストールとビルド
 
 ```bash
-pnpm install && pnpm build
+pnpm install --no-frozen-lockfile
+pnpm build
 ```
 
 環境変数ののセットアップ
@@ -21,6 +22,10 @@ cp .env.example .env
 ```
 
 クイックスタートするためにセットアップする値は以下の通り
+
+Twitterのアカウントはテスト用のあらかじめ作成しておくこと。
+
+あと、OpenAI のAPIも取得しておくこと。
 
 ```txt
 # Suggested quickstart environment variables
@@ -32,8 +37,20 @@ GROK_API_KEY=          # Grok API key
 ELEVENLABS_XI_API_KEY= # API key from elevenlabs (for voice)
 ```
 
+あと、キャラクターのクライアントオプションを指定する。
+
+```json
+"clients": ["twitter"],
+```
+
 以下のシェルスクリプトを実行させる。
 
 ```bash
 sh scripts/start.sh
+```
+
+or 
+
+```bash
+pnpm start --character="characters/trump.character.json"
 ```

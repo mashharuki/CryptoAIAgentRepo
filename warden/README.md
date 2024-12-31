@@ -715,7 +715,12 @@ x/oracleモジュールは、Skip Protocolによって提供されるCosmos SDK�
 - GitHubのx/oracle
 - Wardenドキュメント: オラクルサービス
 
+## セットアップ(ローカルで動かす場合)
 
+- Rustのインストール
+- foundryのインストール
+- Goのインストール
+- justのインストール
 
 ### 参考文献
 1. [WardenProtocol - 公式サイト](https://wardenprotocol.org/)
@@ -730,3 +735,4 @@ x/oracleモジュールは、Skip Protocolによって提供されるCosmos SDK�
 10. [GitHub - warndenprotol](https://github.com/warden-protocol/wardenprotocol/tree/main)
 11. [Example Oapps](https://docs.wardenprotocol.org/build-an-app/examples-of-oapps)
 12. [Npm - wardenjs](https://www.npmjs.com/package/@wardenprotocol/wardenjs)
+13. [Deploy an EVM contract](https://docs.wardenprotocol.org/build-an-app/deploy-smart-contracts-on-warden/deploy-an-evm-contract)

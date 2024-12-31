@@ -1,0 +1,17 @@
+{
+  "name": "wardenjs-sample",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run ./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@wardenprotocol/wardenjs": "^0.0.12-hackmos"
+  }
+}

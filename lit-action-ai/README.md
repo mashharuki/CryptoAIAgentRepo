@@ -1,0 +1,1 @@
+# Lit ActionとOpenAIを組み合わせたサンプルコード

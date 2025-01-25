@@ -13,3 +13,4 @@ Crypto AI Agent について調査・検証するためのリポジトリです�
 7. [Yputube - 【Eliza】Twitter エージェントを作ってみよう！](https://www.youtube.com/watch?v=C-vky-tXpqw)
 8. [GitHub - 【Eliza】Twitter エージェントを作ってみよう！](https://github.com/ytakahashi2020/Eliza/tree/main/01_createAgentWithTwitter)
 9. [Zenn - 【AI Agent】browser-use を使って、自分のブラウザを操作させてみる](https://zenn.dev/ttks/articles/75c2102fe4657e)
+10. [Prompt Engineering Tool](https://prompt-engineering-toolkit-rho.vercel.app/)

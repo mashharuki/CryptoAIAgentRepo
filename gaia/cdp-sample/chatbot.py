@@ -26,7 +26,7 @@ def initialize_agent():
     #llm = ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key)
 
     # Gaiaネットワークのエンドポイントを使う場合は以下にする。
-    llm = ChatOpenAI(model="llama", api_key="GAIA", base_url="https://llamatool.us.gaianet.network/v1")
+    llm = ChatOpenAI(model="llama", api_key="gaia", base_url="https://llamatool.us.gaianet.network/v1")
 
     wallet_data = None
 

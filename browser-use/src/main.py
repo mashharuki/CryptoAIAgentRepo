@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 async def main():
   # AI Agentインスタンスの初期化
   agent = Agent(
-      task="2025年2月1日の日本からミラノへの片道便をGoogle Flightsで検索し、最安値のオプションを返してください。",
+      task="Uniswapのアプリにアクセスして、Etheresum Seploia Testnetで ETHを USDTに交換してください。よろしくお願いします。",
       llm=ChatOpenAI(model="gpt-4o"),
   )
   # 実行

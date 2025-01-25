@@ -592,3 +592,4 @@ https://t.me/agentkit_bot
 4. [GitHub - ワークショップ用のリポジトリ](https://github.com/GaiaNet-AI/workshops)
 5. [GitHub - GaiaNet](https://github.com/GaiaNet-AI)
 6. [cdp Agent キットの実装例](https://github.com/coinbase/cdp-agentkit/tree/master)
+7. [eliza との統合](https://docs.gaianet.ai/tutorial/eliza)

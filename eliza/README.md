@@ -23,9 +23,9 @@ cp .env.example .env
 
 クイックスタートするためにセットアップする値は以下の通り
 
-Twitterのアカウントはテスト用のあらかじめ作成しておくこと。
+Twitter のアカウントはテスト用のあらかじめ作成しておくこと。
 
-あと、OpenAI のAPIも取得しておくこと。
+あと、OpenAI の API も取得しておくこと。
 
 ```txt
 # Suggested quickstart environment variables
@@ -49,8 +49,23 @@ ELEVENLABS_XI_API_KEY= # API key from elevenlabs (for voice)
 sh scripts/start.sh
 ```
 
-or 
+or
 
 ```bash
 pnpm start --character="characters/trump.character.json"
+```
+
+## Gaia との統合
+
+チェックアウト
+
+```bash
+git checkout v0.1.7-alpha.1
+```
+
+インストールとビルドは以下のコマンド
+
+```bash
+pnpm install
+pnpm build
 ```

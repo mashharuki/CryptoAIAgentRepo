@@ -2,26 +2,35 @@
 Tools
 -------------------
 What:
+AIエージェントがAAVEプラットフォームでの借入・貸出を操作できるようにするツールを提供します。
+このツールはエージェントがスマートコントラクトと安全に相互作用するために必要な機能を提供します。
+
 This script is the warehouse of tools that the AI Agent has access to. It controls what the agent can do when interacting with the DeFi platform, AAVE. As of the current implementation the agent can both borrow and lend on the AAVE platform.
 
 Functions:
     lend_tokens
     borrow_tokens
     get_tokens
+
+機能：
+    貸出: lend_tokens
+    借入: borrow_tokens
+    トークン情報取得: get_tokens
 """
 
-# Built in python imports
-import os
 import json
 import logging
+# Built in python imports
+import os
 from typing import Union
+
 from dotenv import load_dotenv
 from langchain_core.tools import tool
-
 # Web3 Interactions
 from web3 import Web3
 
 # Configure logging
+# ロギングの設定
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -33,6 +42,7 @@ logging.basicConfig(
 # Global variable for private key
 _private_key = None
 
+# 秘密鍵をセットするメソッド
 def set_private_key(key: str):
     """
     Set the private key for use in transactions.
@@ -53,9 +63,11 @@ aave_lending_pool_address = "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951" # aave'
 
 
 # Initialize Web3 connection
+# Web3接続の初期化
 web3 = Web3(Web3.HTTPProvider(rpc_url))
 
 # Load AAVE Lending Pool ABI - the ABI allows us to know what functions are available
+# AAVE Lending Pool ABIの読み込み
 current_dir = os.path.dirname(os.path.abspath(__file__))
 abi_path = os.path.join(current_dir, 'aave_lending_pool_abi_testnet.json')
 with open(abi_path, 'r') as abi_file:
@@ -64,8 +76,13 @@ with open(abi_path, 'r') as abi_file:
 # Loading the environmental variables which we don't want to be exposed to the general public
 load_dotenv()
 
+# AAVEプラットフォームに特定の暗号通貨を貸し出す関数 lend_crypto を定義するメソッド
+# トークン量とアドレスを引数に渡す。
 @tool
-def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
+def lend_crypto(
+    amount: float, 
+    asset_address: str
+) -> Union[str, None]:
     """
     Lends a specific cryptocurrency (via its token address) to the AAVE lending pool.
 
@@ -129,6 +146,7 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
     Why: Ensures reliable transaction processing with optimal gas costs
     """
     # Initial validation: Log the attempt and verify Ethereum connection
+    # 初期チェック
     logging.info(f"Attempting to lend {amount} of asset at {asset_address}")
     if not web3.is_connected():
         logging.warning("Unable to connect to Ethereum")
@@ -171,6 +189,7 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
         # Initialize smart contract interfaces
         # lending_pool: Interface to interact with AAVE's lending pool
         # token_contract: Interface to interact with the token contract
+        # ERC20およびAAVEスマートコントラクトの初期化
         lending_pool = web3.eth.contract(address=aave_lending_pool_address, abi=aave_lending_pool_abi)
         token_contract = web3.eth.contract(address=asset_address, abi=erc20_abi)
         logging.info("Contracts initialized successfully")
@@ -180,6 +199,7 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
         logging.info(f"Token decimals: {token_decimals}")
         
         # Setup account and get current blockchain state
+        # アカウントとナンスの情報を取得する。
         account = web3.eth.account.from_key(_private_key)
         nonce = web3.eth.get_transaction_count(account.address)
         logging.info(f"Account address: {account.address}")
@@ -193,6 +213,7 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
 
         # Build approval transaction
         # This transaction allows AAVE to spend our tokens
+        # Approval transactionを作成する。
         approve_tx = token_contract.functions.approve(
             aave_lending_pool_address,  # Who we're approving (AAVE)
             amount_in_wei              # How much we're approving
@@ -222,6 +243,7 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
             
             # Send the raw transaction to the network
             try:
+                # トランザクションを送信する。
                 tx_hash_approve = web3.eth.send_raw_transaction(signed_approve_tx.raw_transaction)
             except Exception as e:
                 logging.error("Failed to send raw transaction")
@@ -242,6 +264,7 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
         try:
             # Build supply transaction to AAVE
             # This transaction actually supplies our tokens to the lending pool
+            # AAVEへの貸し出しトランザクションを作成する。
             supply_tx = lending_pool.functions.supply(
                 asset_address,          # Token we're supplying
                 amount_in_wei,          # Amount we're supplying
@@ -296,6 +319,8 @@ def lend_crypto(amount: float, asset_address: str) -> Union[str, None]:
         return None
 
 
+# AAVEプロトコルの「ユーザーアカウントデータ」を取得します。
+# AAVEプロトコルの「ユーザーアカウントデータ」を取得します。このデータには、担保額、借入可能額、ローンの健全性（Health Factor）などが含まれます。
 def get_user_account_data(account_address: str) -> dict:
     """
     Get user's account data from AAVE, including collateral and borrowing power.
@@ -313,7 +338,9 @@ def get_user_account_data(account_address: str) -> dict:
         - healthFactor: Current health factor
     """
     try:
+        # Aaveのコントラクトを初期化
         lending_pool = web3.eth.contract(address=aave_lending_pool_address, abi=aave_lending_pool_abi)
+        # ユーザーアカウントデータを取得
         account_data = lending_pool.functions.getUserAccountData(account_address).call()
         
         return {
@@ -328,6 +355,7 @@ def get_user_account_data(account_address: str) -> dict:
         logging.error(f"Error getting user account data: {e}")
         return None
 
+# AAVEプロトコルを介して、暗号通貨を借り入れるトランザクションを実行するメソッド
 @tool
 def borrow_crypto(amount: float, asset_address: str, interest_rate_mode: int = 2) -> Union[str, None]:
     """
@@ -406,6 +434,7 @@ def borrow_crypto(amount: float, asset_address: str, interest_rate_mode: int = 2
         logging.info("Connected to Ethereum")
         
         # Initialize AAVE lending pool interface and token contract
+        # コントラクトを初期化する。
         lending_pool = web3.eth.contract(address=aave_lending_pool_address, abi=aave_lending_pool_abi)
         
         # Define minimal ERC20 ABI for decimals
@@ -460,6 +489,7 @@ def borrow_crypto(amount: float, asset_address: str, interest_rate_mode: int = 2
         logging.info(f"Amount in token base units: {amount_in_wei}")
 
         try:
+            # 貸し入れのためのトランザクションを作成する。
             # Build borrow transaction
             borrow_tx = lending_pool.functions.borrow(
                 asset_address,          # Token we're borrowing
@@ -515,8 +545,12 @@ def borrow_crypto(amount: float, asset_address: str, interest_rate_mode: int = 2
         logging.error(f"Error type: {type(e)}")
         return None
 
+# トークンの残高を取得するメソッド
 @tool
-def get_token_balance(token_address: str, user_address: str = None) -> Union[float, None]:
+def get_token_balance(
+    token_address: str, 
+    user_address: str = None
+) -> Union[float, None]:
     """
     Get the token balance for a specific address.
     
@@ -533,6 +567,7 @@ def get_token_balance(token_address: str, user_address: str = None) -> Union[flo
     try:
         # Check web3 connection
         logging.info(f"Checking Web3 connection to: {web3.provider.endpoint_uri}")
+        logging.info(f"Checking Web3 connection to: {web3}")
         if not web3.is_connected():
             logging.error("Web3 is not connected!")
             return None
@@ -575,6 +610,7 @@ def get_token_balance(token_address: str, user_address: str = None) -> Union[flo
 
         # Initialize token contract
         logging.info(f"Initializing token contract at address: {token_address}")
+        # ECR20トークンを初期化する
         token_contract = web3.eth.contract(address=token_address, abi=erc20_abi)
         logging.info("Token contract initialized")
         
@@ -591,6 +627,7 @@ def get_token_balance(token_address: str, user_address: str = None) -> Union[flo
         # Get balance
         logging.info(f"Attempting to get balance for address: {user_address}")
         try:
+            # 残高を取得する。
             balance_wei = token_contract.functions.balanceOf(user_address).call()
             logging.info(f"Raw balance (wei): {balance_wei}")
         except Exception as e:

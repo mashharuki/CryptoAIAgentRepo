@@ -6,28 +6,32 @@ This script acts as the entrypoint to the AI Agent. Within you'll find that it p
 
 
 """
-# Python Built In Libraries
-from typing import Annotated, List # used to set additional metadata for a variable  
-from typing_extensions import TypedDict # a type that allows you to define dictionaries with specific key-value types
 import os
-
-# Langchain / Langraphpip 
-from langgraph.graph import (StateGraph, # data structure which represents the current snapshot of an application 
-                             START # type of node (a python function which has some kind of logic) which takes user input and sends it into the graph 
-                            )
-from langgraph.graph.message import add_messages # appends messages to the end of the attribute it was assigned to
-from langgraph.prebuilt import (ToolNode, # a pre-built component and node whichs runs the tools called in the last AIMessage 
-                                tools_condition # a pre-built component and node which uses the conditional_edge to route to the ToolNode if the last message has tool calls. Otherwise, route to the end.
-                                )
-from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage, BaseMessage
-
-# Tools
-from tools import get_token_balance, lend_crypto, borrow_crypto, set_private_key
-from web3 import Web3
+# Python Built In Libraries
+from typing import (  # used to set additional metadata for a variable
+    Annotated, List)
 
 # User Interface
 import streamlit as st
+from langchain_core.messages import BaseMessage, SystemMessage
+from langchain_groq import ChatGroq
+# Langchain / Langraphpip 
+from langgraph.graph import \
+    START  # type of node (a python function which has some kind of logic) which takes user input and sends it into the graph
+from langgraph.graph import \
+    StateGraph  # data structure which represents the current snapshot of an application
+from langgraph.graph.message import \
+    add_messages  # appends messages to the end of the attribute it was assigned to
+from langgraph.prebuilt import \
+    ToolNode  # a pre-built component and node whichs runs the tools called in the last AIMessage
+from langgraph.prebuilt import \
+    tools_condition  # a pre-built component and node which uses the conditional_edge to route to the ToolNode if the last message has tool calls. Otherwise, route to the end.
+# Tools
+from tools import (borrow_crypto, get_token_balance, lend_crypto,
+                   set_private_key)
+from typing_extensions import \
+    TypedDict  # a type that allows you to define dictionaries with specific key-value types
+from web3 import Web3
 
 # Initialize Web3
 web3 = Web3(Web3.HTTPProvider(os.getenv("RPC_URL")))
@@ -85,6 +89,7 @@ llm = ChatGroq(model="llama3-70b-8192", api_key=groq_api_key)
 ####
 
 # Initialize LLM and Tools
+# 使うツールとLLMを初期化する。
 tools = [get_token_balance, lend_crypto, borrow_crypto]
 llm_with_tools = llm.bind_tools(tools=tools)
 
@@ -96,6 +101,7 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 # Chatbot Function
+# chatbot 関数
 def chatbot(state: State):
     # Get all messages including history
     messages = state["messages"]
@@ -105,11 +111,13 @@ def chatbot(state: State):
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
     
     # Get response from LLM with full conversation history
+    # AIに推論を実行させる。
     response = llm_with_tools.invoke(messages)
     
     return {"messages": [response]}
 
 # Node Configuration
+# AI Agent用のワークフローを作成する。
 tools_node = ToolNode(tools=tools)
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_node("tools", tools_node)
@@ -149,7 +157,7 @@ if prompt := st.chat_input():
     st.chat_message("user").write(prompt)
 
     # Convert chat history to LangChain message format
-    from langchain_core.messages import HumanMessage, AIMessage
+    from langchain_core.messages import AIMessage, HumanMessage
     history = []
     for msg in st.session_state.messages:
         if msg["role"] == "user":

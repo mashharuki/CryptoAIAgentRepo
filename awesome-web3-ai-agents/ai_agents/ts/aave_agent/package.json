@@ -1,0 +1,28 @@
+{
+  "name": "aave_agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx tsx src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "eslint": "^9.19.0",
+    "globals": "^15.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.22.0"
+  },
+  "dependencies": {
+    "@langchain/community": "^0.3.27",
+    "@langchain/core": "^0.3.36",
+    "@langchain/groq": "^0.1.3",
+    "@langchain/langgraph": "^0.2.42",
+    "dotenv": "^16.4.7",
+    "viem": "^2.22.17"
+  }
+}

@@ -1,8 +1,9 @@
 import { ChatGroq } from '@langchain/groq';
 import { MemorySaver } from '@langchain/langgraph';
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { createReactAgent, ToolNode } from '@langchain/langgraph/prebuilt';
 import * as dotenv from 'dotenv';
 import { privateKeyToAccount } from 'viem/accounts';
+import { getTokenBalance } from './utils/tools';
 
 dotenv.config();
 
@@ -35,18 +36,19 @@ const setUp = async () => {
     3. Borrow tokens against their collateral
   `;
 
+  // 外部ツールを設定
+  const tools = [getTokenBalance];
+  const toolNode = new ToolNode(tools);
   // LLM インスタンスを生成
   const llm = new ChatGroq({ model: 'llama3-70b-8192', apiKey: Groq_API_Key });
-  // 外部ツールを設定
-  
   // MemoryServerインスタンスを生成
   const agentCheckpointer = new MemorySaver();
 
   // AI Agent用のインスタンスをs
   const agent = createReactAgent({
     llm: llm,
-    tools: [],
-    checkpointSaver: agentCheckpointer,
+    tools: toolNode,
+    // checkpointSaver: agentCheckpointer,
     messageModifier: SYSTEM_PROMPT
   });
 
@@ -61,7 +63,11 @@ const main = async() => {
   console.log("🏦💬 AAVE DeFi Assistant");
 
   // セットアップする。
-  await setUp();
+  const agent = await setUp();
+  
+  const result = await agent.invoke({ messages: ["What is the balance of USDC?"] });
+
+  console.log('Result:', result.messages[3].content);
 
   console.log('=========================== [END] ===========================');
 }

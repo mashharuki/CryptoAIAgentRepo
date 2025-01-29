@@ -1,7 +1,9 @@
+import { tool } from "@langchain/core/tools";
 import * as dotenv from 'dotenv';
 import { createPublicClient, createWalletClient, http, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
+import { z } from "zod";
 import { AAVE_LENDING_POOL_ABI_TESTNET } from './abis/aave_lending_pool_abi_testnet';
 import { ERC20_ABI } from './abis/erc20_abi';
 
@@ -123,11 +125,6 @@ async function lendCrypto(amount: number, assetAddress: `0x${string}`): Promise<
 }
 
 /**
- * 暗号資産を借りるメソッド
- */
-
-
-/**
  * ユーザーの資産情報を取得するメソッド
  * @param userAddress 
  * @returns 
@@ -164,25 +161,51 @@ async function getUserAccountData(userAddress: `0x${string}`): Promise<Record<st
  * @param userAddress 
  * @returns 
  */
-async function getTokenBalance(tokenAddress: `0x${string}`, userAddress?: `0x${string}`): Promise<bigint | null> {
-  try {
-    if (!userAddress) {
-      userAddress = walletClient.account!.address;
+const getTokenBalance = tool(
+  async (input: { tokenAddress: `0x${string}`; userAddress?: `0x${string}` }) => {
+    try {
+      const { tokenAddress, userAddress } = input;
+      let finalUserAddress = userAddress;
+
+      // ユーザーアドレスが指定されていない場合、デフォルトで walletClient のアドレスを使用
+      if (!finalUserAddress) {
+        finalUserAddress = walletClient.account!.address;
+      }
+
+      // トークンの残高を取得
+      const balance = await client.readContract({
+        abi: ERC20_ABI,
+        address: tokenAddress,
+        functionName: 'balanceOf',
+        args: [finalUserAddress],
+      });
+
+      // トークンのデシマル数を取得
+      const decimals = await client.readContract({
+        abi: ERC20_ABI,
+        address: tokenAddress,
+        functionName: 'decimals',
+        args: [],
+      });
+
+      // Decimalに合わせて残高を調整（balanceを割る）
+      const balanceInDecimal = Number(balance) / Math.pow(10, decimals as number);
+
+      return balanceInDecimal;
+    } catch (error) {
+      console.error(`Error in getTokenBalanceTool: ${error}`);
+      return null;
     }
-
-    const balance = await client.readContract({
-      abi: ERC20_ABI,
-      address: tokenAddress,
-      functionName: 'balanceOf',
-      args: [userAddress],
-    });
-
-    return balance as bigint;
-  } catch (error) {
-    console.error(`Error in getTokenBalance: ${error}`);
-    return null;
+  },
+  {
+    name: "get_token_balance",
+    description: "Get the token balance of the user for the given token address.",
+    schema: z.object({
+      tokenAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address").transform((val) => val as `0x${string}`).describe("The token contract address."),
+      userAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address").optional().transform((val) => val as `0x${string}`).describe("The user's wallet address (optional). If not provided, defaults to the walletClient address."),
+    }),
   }
-}
+);
 
 export { borrowCrypto, getTokenBalance, getUserAccountData, lendCrypto };
 

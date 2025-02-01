@@ -38,10 +38,9 @@ const main = async () => {
   const chainId = 84532;
 
   // 少額の暗号ETHを送金する。
-  const sendData = await privy.walletApi.rpc({
+  const sendData = await privy.walletApi.ethereum.sendTransaction({
     // Your wallet ID (not address), returned during creation
     walletId: "vshl96x85uvrq1f9z1g5r0wn",
-    method: 'eth_sendTransaction',
     caip2: `eip155:${chainId}`,
     params: {
       transaction: {

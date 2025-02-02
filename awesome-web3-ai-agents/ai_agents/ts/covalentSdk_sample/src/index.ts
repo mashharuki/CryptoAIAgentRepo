@@ -52,7 +52,7 @@ const main = async () => {
   const zee = new ZeeWorkflow({
     description: "A workflow of agents that do stuff together",
     output: "Just bunch of stuff",
-    agents: { agent1 },
+    agents: { agent2 },
   });
 
   // ワークフローを実行

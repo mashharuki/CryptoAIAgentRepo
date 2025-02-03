@@ -64,13 +64,15 @@ const setUp = async () => {
   // MemoryServerインスタンスを生成
   const agentCheckpointer = new MemorySaver();
 
-  // AI Agent用のインスタンスをs
+  // AI Agent用のインスタンスを
   const agent = createReactAgent({
     llm: llm,
     tools: toolNode,
     // checkpointSaver: agentCheckpointer,
     messageModifier: SYSTEM_PROMPT
   });
+
+
 
   return agent;
 }

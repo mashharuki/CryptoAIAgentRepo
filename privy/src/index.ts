@@ -17,13 +17,16 @@ const privy = new PrivyClient(PRIVY_APP_ID as string, PRIVY_APP_SECRET_KEY as st
 const main = async () => {
   // walletを作成
   // IDは毎回変わるため、作成したwalletのIDを保存しておく必要がある。
-  const {id, address, chainType} = await privy.walletApi.create({chainType: 'ethereum'});
+  // const {id, address, chainType} = await privy.walletApi.create({chainType: 'ethereum'});
 
-  console.log('wallet created:', {id, address, chainType});
+
+  const walletData = await privy.walletApi.getWallet({id: "vshl96x85uvrq1f9z1g5r0wn"});
+
+  console.log('walletData:', walletData);
 
   // 署名を行う。
   const {data} = await privy.walletApi.rpc({
-    walletId: id,
+    walletId: walletData.id,
     method: 'personal_sign',
     params: {
       message: 'Hello server wallets!'
@@ -38,23 +41,18 @@ const main = async () => {
   const chainId = 84532;
 
   // 少額の暗号ETHを送金する。
-  const sendData = await privy.walletApi.ethereum.sendTransaction({
+  const txData = await privy.walletApi.ethereum.sendTransaction({
     // Your wallet ID (not address), returned during creation
-    walletId: "vshl96x85uvrq1f9z1g5r0wn",
+    walletId: walletData.id,
     caip2: `eip155:${chainId}`,
-    params: {
-      transaction: {
-        // Be sure to replace this with your recipient address
-        to: '0x51908F598A5e0d8F1A3bAbFa6DF76F9704daD072',
-        value: 0.0001,
-        chainId: chainId,
-      },
+    transaction: {
+      to: '0x51908F598A5e0d8F1A3bAbFa6DF76F9704daD072',
+      value: 1000000,
+      chainId: chainId,
     },
   });
-  // @ts-ignore 
-  const {hash} = sendData.data;
 
-  console.log('transaction hash:', hash);
+  console.log('transaction hash:', txData.hash);
 };
 
 main();

@@ -1,4 +1,4 @@
-import { Agent, ZeeWorkflow } from "@covalenthq/ai-agent-sdk";
+import { Agent, NFTBalancesTool, TokenBalancesTool, TransactionsTool, ZeeWorkflow } from "@covalenthq/ai-agent-sdk";
 import * as dotenv from "dotenv";
 
 dotenv.config(); 
@@ -25,13 +25,12 @@ const main = async () => {
     instructions: [
       "You are a DeFi expert with extensive knowledge of lending. Please explain in simple terms to beginners which token they should invest in next."
     ],
-    /*
+    /**/
     tools: {
       tokenBalances: new TokenBalancesTool(GOLDRUSH_API_KEY),
       nftBalances: new NFTBalancesTool(GOLDRUSH_API_KEY),
       transactions: new TransactionsTool(GOLDRUSH_API_KEY),
     },
-    */
   });
 
   // Agentを作成(Geminiで作成)
@@ -52,7 +51,7 @@ const main = async () => {
   const zee = new ZeeWorkflow({
     description: "A workflow of agents that do stuff together",
     output: "Just bunch of stuff",
-    agents: { agent2 },
+    agents: { agent1 },
   });
 
   // ワークフローを実行
